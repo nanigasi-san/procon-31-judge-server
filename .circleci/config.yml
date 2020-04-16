@@ -1,0 +1,32 @@
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7.2
+    steps:
+      - checkout
+      - restore-cache:
+          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      - run:
+          name: install package pip
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+      - run:
+          name: run test
+          command: |
+            . venv/bin/activate
+            pip install pytest
+            pip install pytest-cov
+            pytest -vv --cov=src --cov-report=html:tests/reports --junit-xml=tests/results/results.xml
+      - save_cache:
+          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - "venv"
+      - store_artifacts:
+          path: tests/reports/
+      - store_test_results:
+          path: tests/results/
