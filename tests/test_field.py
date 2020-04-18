@@ -15,17 +15,17 @@ def plane_status():
 
 @pytest.fixture
 def tops():
-    return ((0, 0), (0, 2), (2, 2), (2, 0), (0, 0))
+    return [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
 
 
 @pytest.fixture
 def tops6():
-    return ((0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0), (0, 0))
+    return [(0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0), (0, 0)]
 
 
 @pytest.fixture
 def tops8():
-    return ((1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1), (1, 1))
+    return [(1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1), (1, 1)]
 
 
 def test_init_base_point(field):
@@ -60,17 +60,17 @@ def test_build_castle_1(field, plane_status, tops):
 
 def test_build_castle_2(field):
     with pytest.raises(ValueError):
-        field.build_castle("O", ((0, 0), (2, 4), (0, 4), (4, 0), (0, 0)))
+        field.build_castle("O", [(0, 0), (2, 4), (0, 4), (4, 0), (0, 0)])
 
 
 def test_build_castle_3(field):
     with pytest.raises(ValueError):
-        field.build_castle("O", ((0, 0), (0, 2), (0, 0)))
+        field.build_castle("O", [(0, 0), (0, 2), (0, 0)])
 
 
 def test_build_castle_4(field):
     with pytest.raises(ValueError):
-        field.build_castle("O", ((0, 0), (0, 2), (2, 2), (0, 0)))
+        field.build_castle("O", [(0, 0), (0, 2), (2, 2), (0, 0)])
 
 
 def test_build_castle_5(field, plane_status, tops6):
@@ -105,13 +105,13 @@ def test_fill_1(field, plane_status, tops):
 
 
 def test_fill_2(field):
-    uncorrect_tops = ((0, 0), (0, 2), (2, 3), (2, 0), (0, 0))
+    uncorrect_tops = [(0, 0), (0, 2), (2, 3), (2, 0), (0, 0)]
     with pytest.raises(ValueError):
         field.fill("O", "+", uncorrect_tops)
 
 
 def test_fill_3(field, plane_status, tops):
-    sub_tops = ((0, 3), (0, 5), (2, 5), (2, 3), (0, 3))
+    sub_tops = [(0, 3), (0, 5), (2, 5), (2, 3), (0, 3)]
     field.build_castle("O", tops)
     field.build_castle("O", sub_tops)
     field.fill("O", "+", tops)
@@ -131,7 +131,7 @@ def test_fill_3(field, plane_status, tops):
 def test_calc_point_1(field, tops):
     field.build_castle("O", tops)
     field.fill("O", "+", tops)
-    Xtops = ((0, 3), (0, 5), (2, 5), (2, 3), (0, 3))
+    Xtops = [(0, 3), (0, 5), (2, 5), (2, 3), (0, 3)]
     field.build_castle("X", Xtops)
     field.fill("X", "-", Xtops)
 
@@ -158,7 +158,7 @@ def test_calc_point_2(field):
 
 
 def same_path(path_a, path_b):
-    return (path_a == path_b) or (tuple(path_a[::-1]) == path_b)
+    return (path_a == path_b) or (path_a[::-1] == path_b)
 
 
 def reduction(path: tuple):
@@ -174,7 +174,7 @@ def reduction(path: tuple):
         if diff != before_diff:
             reducted_path.append(path[i])
         before_diff = diff
-    return tuple(reducted_path)
+    return reducted_path
 
 
 def test_judge_castle_1(field):
@@ -192,19 +192,19 @@ def test_judge_castle_2(field, tops):
 def test_judge_zone_1(field, tops):
     field.build_castle("O", tops)
     zones = field.judge_zone("O")
-    assert zones == ((1, 1), )
+    assert zones == [(1, 1), ]
 
 
 def test_judge_zone_2(field, tops6):
     field.build_castle("O", tops6)
     zones = field.judge_zone("O")
-    assert zones == ((1, 1), (1, 2), (2, 1))
+    assert zones == [(1, 1), (1, 2), (2, 1)]
 
 
 def test_judge_zone_3(field, tops8):
     field.build_castle("O", tops8)
     zones = field.judge_zone("O")
-    assert zones == ((2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2))
+    assert zones == [(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2)]
 
 
 def test_update(field, plane_status, tops):

@@ -27,7 +27,13 @@ jobs:
           command: |
             . venv/bin/activate
             pip install flake8
-            flake8 src --ignore=E501
+            flake8 src --show-source
+      - run:
+          name: lint with mypy
+          command: |
+            . venv/bin/activate
+            pip install mypy
+            mypy src
       - save_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
