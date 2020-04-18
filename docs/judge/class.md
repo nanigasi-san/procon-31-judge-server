@@ -13,6 +13,10 @@
 |name|type|description|
 |:-|:-|:-|
 |calc_point|dict[str, int]|盤面から得点を計算する|
+|fill|None|盤面の指定した頂点を繋ぐ城壁を生成し、内部を領域にする|
+|judge_castle|tuple[tuple[tuple[int]]]|城郭を判定してパス(tuple[tuple[int]])のタプルとして返す|
+
+|judge_zone|None|全ての点に対して、その点が領域になるかどうかを判定し、更新する|
 
 ### calc_point
 盤面から得点を計算して辞書を返す関数
@@ -27,6 +31,23 @@
 |:-|:-|:-|
 ||dict[str, int]|各チームの得点。`チーム名:得点`の形式で格納される|
 
+---
+
+### build_castle
+城郭を建てる
+
+#### Parameters
+|name|type|description|
+|:-|:-|:-|
+|wall|str|城壁を表す文字|
+|tops|tuple[tuple]|頂点集合|
+
+#### Returns
+|name|type|description|
+|:-|:-|:-|
+||||
+
+---
 ### fill
 指定した頂点をつなぐように城郭を繋ぎ、内部を陣地にする
 
@@ -42,4 +63,48 @@
 ||||
 
 ---
+
+### update
+盤面をアップデートする(領域)
+
+#### Parameters
+|name|type|description|
+|:-|:-|:-|
+||||
+
+#### Returns
+|name|type|description|
+|:-|:-|:-|
+||||
+
+---
+
+### judge_castle
+城郭判別
+
+#### Parameters
+|name|type|description|
+|:-|:-|:-|
+||||
+
+#### Returns
+|name|type|description|
+|:-|:-|:-|
+|castles|tuple[tuple[tuple[int]]]|(城郭を表すタプル(頂点のタプル)のタプル)のタプル|
+
+---
+
+### judge_zone
+領域判定
+
+#### Parameters
+|name|type|description|
+|:-|:-|:-|
+||||
+
+#### Returns
+|name|type|description|
+|:-|:-|:-|
+||||
+
 ---
