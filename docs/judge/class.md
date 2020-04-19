@@ -93,7 +93,7 @@
 #### Returns
 |name|type|description|
 |:-|:-|:-|
-|castles|list[list[tuple[int, int]]]|(城郭を表すタプル(頂点のタプル)のタプル)のタプル|
+|castles|dict[str, list[list[tuple[int, int]]]]|(城郭を表すタプル(頂点のタプル)のタプル)のタプル|
 
 ---
 
@@ -108,7 +108,7 @@
 #### Returns
 |name|type|description|
 |:-|:-|:-|
-|zones|set[tuple[int, int]]|領域判定したマス|
+|zones|dict[str, set[tuple[int, int]]]|領域判定したマス|
 
 ---
 
