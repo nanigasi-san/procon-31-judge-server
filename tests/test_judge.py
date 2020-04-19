@@ -259,6 +259,44 @@ def test_judge_zone_3(judge, tops8):
     assert zones["teamA"] == {(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2)}
 
 
+def test_judge_zone_4(judge, tops4_2):
+    judge.build_castle("X", tops4_2)
+    zones = judge.judge_zone()
+    assert not(zones["teamA"])
+    assert len(zones["teamB"]) == 1
+    assert zones["teamB"] == {(1, 4), }
+
+
+def test_judge_zone_5(judge, tops4_1, tops4_2):
+    judge.build_castle("O", tops4_1)
+    judge.build_castle("X", tops4_2)
+    zones = judge.judge_zone()
+    assert len(zones["teamA"]) == 1
+    assert len(zones["teamB"]) == 1
+    assert zones["teamA"] == {(1, 1), }
+    assert zones["teamB"] == {(1, 4), }
+
+
+def test_judge_zone_6(judge, tops4_3, tops4_4):
+    judge.build_castle("O", tops4_3)
+    judge.build_castle("X", tops4_4)
+    zones = judge.judge_zone()
+    assert len(zones["teamA"]) == 20
+    assert len(zones["teamB"]) == 4
+    assert zones["teamA"] == {(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 1), (2, 6), (3, 1), (3, 6), (4, 1), (4, 6), (5, 1), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}
+    assert zones["teamB"] == {(3, 3), (3, 4), (4, 3), (4, 4)}
+
+
+def test_judge_zone_7(judge, tops4_3, tops4_4):
+    judge.build_castle("O", tops4_4)
+    judge.build_castle("X", tops4_3)
+    zones = judge.judge_zone()
+    assert len(zones["teamA"]) == 4
+    assert len(zones["teamB"]) == 20
+    assert zones["teamB"] == {(3, 3), (3, 4), (4, 3), (4, 4)}
+    assert zones["teamA"] == {(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 1), (2, 6), (3, 1), (3, 6), (4, 1), (4, 6), (5, 1), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}
+
+
 def test_update(judge, mock_status, tops4_1):
     judge.build_castle("O", tops4_1)
     judge.update()
