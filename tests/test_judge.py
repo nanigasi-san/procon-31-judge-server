@@ -23,6 +23,16 @@ def tops4_2():
 
 
 @pytest.fixture
+def tops4_3():
+    return [(0, 0), (0, 7), (7, 7), (7, 0)]
+
+
+@pytest.fixture
+def tops4_4():
+    return [(2, 2), (2, 5), (5, 5), (5, 2)]
+
+
+@pytest.fixture
 def tops6():
     return [(0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0)]
 
@@ -209,6 +219,26 @@ def test_judge_castle_4(judge, tops4_1, tops4_2):
     assert len(castles["teamB"]) == 1
     assert same_path(reduction(castles["teamA"][0]), tops4_1)
     assert same_path(reduction(castles["teamB"][0]), tops4_2)
+
+
+def test_judge_castle_5(judge, tops4_3, tops4_4):
+    judge.build_castle("O", tops4_3)
+    judge.build_castle("X", tops4_4)
+    castles = judge.judge_castle()
+    assert len(castles["teamA"]) == 1
+    assert len(castles["teamB"]) == 1
+    assert same_path(reduction(castles["teamA"][0]), tops4_3)
+    assert same_path(reduction(castles["teamB"][0]), tops4_4)
+
+
+def test_judge_castle_6(judge, tops4_3, tops4_4):
+    judge.build_castle("X", tops4_3)
+    judge.build_castle("O", tops4_4)
+    castles = judge.judge_castle()
+    assert len(castles["teamA"]) == 1
+    assert len(castles["teamB"]) == 1
+    assert same_path(reduction(castles["teamB"][0]), tops4_3)
+    assert same_path(reduction(castles["teamA"][0]), tops4_4)
 
 
 def test_judge_zone_1(judge, tops4_1):
