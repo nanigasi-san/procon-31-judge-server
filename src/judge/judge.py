@@ -1,6 +1,6 @@
 from .field import Field
-from collections import deque
-from typing import List, Dict, Tuple, Set, Deque
+from collections import deque, defaultdict
+from typing import List, Dict, Tuple, Set, Deque, DefaultDict
 
 # IDEA: namedtupleの方がよい？
 Point = Tuple[int, int]
@@ -134,7 +134,7 @@ class Judge:
             one_steps = ((1, 0), (-1, 0), (0, 1), (0, -1))
             for i in range(4):
                 x, y = start
-                if graph[x][y] == wall:
+                if graph[x][y] in self.wall_mark.values():  # 城壁は領域になりえない
                     break
                 dx, dy = one_steps[i]
                 while (0 <= x + dx < x_lim) and (0 <= y + dy < y_lim):
@@ -152,16 +152,24 @@ class Judge:
                             if (a in castle) and (b in castle) and (c in castle) and (d in castle):
                                 return True
             return False
-        zones: Dict[str, Set[Point]] = {}
-        for team in self.teams:
-            zones[team] = set()
-            for x in range(self.field.height):
-                for y in range(self.field.width):
-                    p = sfs(self.field.status, self.wall_mark[team], (x, y), self.field.height, self.field.width)
+        
+        zones: DefaultDict[str, Set[Point]] = defaultdict(set)
+        parent_castle: Dict[Point, Tuple[str, List[Point]]] = {}
+        for x in range(self.field.height):
+            for y in range(self.field.width):
+                xy = (x, y)
+                for team in self.teams:
+                    p = sfs(self.field.status, self.wall_mark[team], xy, self.field.height, self.field.width)
                     for castle in castles[team]:
                         if check_union(p, castle):
-                            zones[team].add((x, y))
-                            break
+                            if xy not in parent_castle.keys():
+                                parent_castle[xy] = (team, castle)
+                                zones[team].add(xy)
+                            else:
+                                if len(parent_castle[xy][1]) > len(castle):
+                                    zones[parent_castle[xy][0]].remove(xy)
+                                    zones[team].add(xy)
+                                    parent_castle[xy] = (team, castle)
         return zones
 
     def update(self) -> None:
