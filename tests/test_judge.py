@@ -190,7 +190,6 @@ def test_judge_castle_2(judge, tops4_1):
     castles = judge.judge_castle()
     assert len(castles["teamA"]) == 1
     assert not(castles["teamB"])
-    # TODO: ここのはんていもっと綺麗にできるループ回して(append(pop(0)))で毎回比較とか
     assert same_path(reduction(castles["teamA"][0]), tops4_1)
 
 
