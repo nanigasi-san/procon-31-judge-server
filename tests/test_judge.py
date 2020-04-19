@@ -14,17 +14,17 @@ def mock_status():
 
 @pytest.fixture
 def tops():
-    return [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
+    return [(0, 0), (0, 2), (2, 2), (2, 0)]
 
 
 @pytest.fixture
 def tops6():
-    return [(0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0), (0, 0)]
+    return [(0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0)]
 
 
 @pytest.fixture
 def tops8():
-    return [(1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1), (1, 1)]
+    return [(1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1)]
 
 
 def test_init_judge(judge, field):
@@ -50,17 +50,17 @@ def test_build_castle_1(judge, mock_status, tops):
 
 def test_build_castle_2(judge):
     with pytest.raises(ValueError):
-        judge.build_castle("O", [(0, 0), (2, 4), (0, 4), (4, 0), (0, 0)])
+        judge.build_castle("O", [(0, 0), (2, 4), (0, 4), (4, 0)])
 
 
 def test_build_castle_3(judge):
     with pytest.raises(ValueError):
-        judge.build_castle("O", [(0, 0), (0, 2), (0, 0)])
+        judge.build_castle("O", [(0, 0), (0, 2)])
 
 
 def test_build_castle_4(judge):
     with pytest.raises(ValueError):
-        judge.build_castle("O", [(0, 0), (0, 2), (2, 2), (0, 0)])
+        judge.build_castle("O", [(0, 0), (0, 2), (2, 2)])
 
 
 def test_build_castle_5(judge, mock_status, tops6):
@@ -95,13 +95,13 @@ def test_fill_1(judge, mock_status, tops):
 
 
 def test_fill_2(judge):
-    uncorrect_tops = [(0, 0), (0, 2), (2, 3), (2, 0), (0, 0)]
+    uncorrect_tops = [(0, 0), (0, 2), (2, 3), (2, 0)]
     with pytest.raises(ValueError):
         judge.fill("O", "+", uncorrect_tops)
 
 
 def test_fill_3(judge, mock_status, tops):
-    sub_tops = [(0, 3), (0, 5), (2, 5), (2, 3), (0, 3)]
+    sub_tops = [(0, 3), (0, 5), (2, 5), (2, 3)]
     judge.build_castle("O", tops)
     judge.build_castle("O", sub_tops)
     judge.fill("O", "+", tops)
@@ -121,7 +121,7 @@ def test_fill_3(judge, mock_status, tops):
 def test_calc_point_1(judge, tops):
     judge.build_castle("O", tops)
     judge.fill("O", "+", tops)
-    Xtops = [(0, 3), (0, 5), (2, 5), (2, 3), (0, 3)]
+    Xtops = [(0, 3), (0, 5), (2, 5), (2, 3)]
     judge.build_castle("X", Xtops)
     judge.fill("X", "-", Xtops)
 

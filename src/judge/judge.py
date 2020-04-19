@@ -31,10 +31,12 @@ class Judge:
         return {team_name: point for team_name, point in zip(self.teams, points)}
 
     def build_castle(self, wall: str, tops: List[Point]) -> None:
-        # 城郭の最小構成は正方形なので、頂点が5つ以下なら不正
-        if len(tops) < 5:
+        # 城郭の最小構成は正方形なので、頂点が4つ未満なら不正
+        if len(tops) < 4:
             raise ValueError("The castle must pass only once beyond the starting point and consist only of straight lines parallel to the x or y axis. {0} is an invalid entry.".format(tops))
         start = tops[0]
+        tops = tops[:] + [start]
+        print("tops:", tops)
         for i in range(1, len(tops)):
             target = tops[i]
             if start[0] == target[0]:
@@ -62,7 +64,8 @@ class Judge:
                 raise ValueError("tops must be identical in x or y in each of its neighbors. (e.g., (0, 0)->(0, 3), (3, 5) -> (1, 5)).\n{0} -> {1} is not correct.".format(tops[i], tops[i + 1]))
 
         # TODO: 5頂点以上の城郭判定
-        if len(tops) == 5:  # 長方形
+        if len(tops) == 4:  # 長方形
+            tops = tops[:] + [tops[0]]
             xlist, ylist = [tops[i][0] for i in range(len(tops))], [tops[i][1] for i in range(len(tops))]
             mnx, mxx = min(xlist), max(xlist)
             mny, mxy = min(ylist), max(ylist)
@@ -71,7 +74,6 @@ class Judge:
                     self.field.status[x][y] = zone
             return
 
-    # TODO: 何も返さずメンバを更新するようにする
     def judge_castle(self) -> List[List[Point]]:
         def dfs_gird(graph: List[List[str]], start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
             seen = {start}
