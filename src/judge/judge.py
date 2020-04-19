@@ -10,7 +10,7 @@ class Judge:
     def __init__(self, field: Field, teams: Tuple[str, str]):
         self.field = field
         self.teams = teams
-        self.walls = {teams[0]: "O", teams[1]: "X"}
+        self.wall_mark = {teams[0]: "O", teams[1]: "X"}
         self.zone_mark = {teams[0]: "+", teams[1]: "-"}
 
     def calc_point(self) -> Dict[str, int]:
@@ -118,7 +118,7 @@ class Judge:
             for i in range(self.field.height):
                 for j in range(self.field.width):
                     start = (i, j)
-                    prev = dfs_gird(self.field.status, self.walls[team], start, self.field.height, self.field.height)
+                    prev = dfs_gird(self.field.status, self.wall_mark[team], start, self.field.height, self.field.height)
                     path = restore_path(start, prev)
                     expanded_path = sorted(set(path))
                     if path and expanded_path not in seen:
@@ -126,7 +126,7 @@ class Judge:
                     seen.append(expanded_path)
         return res
 
-    def judge_zone(self, wall: str) -> Dict[str, Set[Point]]:
+    def judge_zone(self) -> Dict[str, Set[Point]]:
         castles = self.judge_castle()
 
         def sfs(graph: List[List[str]], wall: str, start: Point, x_lim: int, y_lim: int) -> List[List[Point]]:
@@ -157,7 +157,7 @@ class Judge:
             zones[team] = set()
             for x in range(self.field.height):
                 for y in range(self.field.width):
-                    p = sfs(self.field.status, self.walls[team], (x, y), self.field.height, self.field.width)
+                    p = sfs(self.field.status, self.wall_mark[team], (x, y), self.field.height, self.field.width)
                     for castle in castles[team]:
                         if check_union(p, castle):
                             zones[team].add((x, y))
@@ -166,7 +166,7 @@ class Judge:
 
     def update(self) -> None:
         for team in self.teams:
-            for x, y in self.judge_zone(self.walls[team])[team]:
+            for x, y in self.judge_zone()[team]:
                 self.field.status[x][y] = self.zone_mark[team]
         return
 

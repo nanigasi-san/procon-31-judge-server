@@ -243,19 +243,19 @@ def test_judge_castle_6(judge, tops4_3, tops4_4):
 
 def test_judge_zone_1(judge, tops4_1):
     judge.build_castle("O", tops4_1)
-    zones = judge.judge_zone("O")
+    zones = judge.judge_zone()
     assert zones["teamA"] == {(1, 1), }
 
 
 def test_judge_zone_2(judge, tops6):
     judge.build_castle("O", tops6)
-    zones = judge.judge_zone("O")
+    zones = judge.judge_zone()
     assert zones["teamA"] == {(1, 1), (1, 2), (2, 1)}
 
 
 def test_judge_zone_3(judge, tops8):
     judge.build_castle("O", tops8)
-    zones = judge.judge_zone("O")
+    zones = judge.judge_zone()
     assert zones["teamA"] == {(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2)}
 
 
