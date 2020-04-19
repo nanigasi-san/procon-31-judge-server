@@ -27,7 +27,7 @@ jobs:
           command: |
             . venv/bin/activate
             pip install flake8
-            flake8 src --show-source
+            flake8 src tests
       - run:
           name: lint with mypy
           command: |

@@ -1,14 +1,18 @@
 classDiagram
+    Field -- Judge
     class Field {
         +int height
         +int width
         +list[list[int]] base_point
         +list[list[str]] status
-        +list[str] team
+    }
+    class Judge {
+        +Field field
+        +tuple[str, str] teams
         +calc_point(): dict[str, int]
         +build_castle(): None
         +fill(): None
         +update(): None
-        +judge_castle(): list[list[tuple[int]]]
-        +judge_zone(): list[tuple[int]]
+        +judge_castle(): list[list[tuple[int, int]]]
+        +judge_zone(): list[tuple[int, int]]
     }

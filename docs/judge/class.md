@@ -12,10 +12,26 @@
 ## methods
 |name|type|description|
 |:-|:-|:-|
+||||
+
+---
+
+# judge.Judge
+審判を表すクラス
+## Attributes
+|name|type|description|
+|:-|:-|:-|
+|team|tuple[str, str]|チーム名|
+
+## methods
+|name|type|description|
+|:-|:-|:-|
 |calc_point|dict[str, int]|盤面から得点を計算する|
 |fill|None|盤面の指定した頂点を繋ぐ城壁を生成し、内部を領域にする|
-|judge_castle|list[list[tuple[int]]]|城郭を判定してパス(tuple[tuple[int]])のタプルとして返す|
-|judge_zone|list[tuple[int]]|全ての点に対して、その点が領域になるかどうかを判定し、更新する|
+|judge_castle|list[list[tuple[int, int]]]|城郭を判定してパス(list[tuple[int, int]])のタプルとして返す|
+|judge_zone|list[tuple[int, int]]|全ての点に対して、その点が領域になるかどうかを判定し、更新する|
+|update|None|盤面を更新する|
+
 
 ### calc_point
 盤面から得点を計算して辞書を返す関数
@@ -39,7 +55,7 @@
 |name|type|description|
 |:-|:-|:-|
 |wall|str|城壁を表す文字|
-|tops|list[tuple[int]]|頂点集合|
+|tops|list[tuple[int, int]]|頂点集合|
 
 #### Returns
 |name|type|description|
@@ -53,23 +69,9 @@
 #### Parameters
 |name|type|description|
 |:-|:-|:-|
-|marker|tuple[str]|城壁と陣地を表す文字|
-|tops|list[tuple[int]]|頂点のタプル。前後左右のどれかへの直進だけでたどりつける二点が並んでいないといけない|
-
-#### Returns
-|name|type|description|
-|:-|:-|:-|
-||||
-
----
-
-### update
-盤面をアップデートする(領域)
-
-#### Parameters
-|name|type|description|
-|:-|:-|:-|
-||||
+|wall|str|城壁を表す文字|
+|zone|str|領域を表す文字|
+|tops|list[tuple[int, int]]|頂点のタプル。前後左右のどれかへの直進だけでたどりつける二点が並んでいないといけない|
 
 #### Returns
 |name|type|description|
@@ -89,7 +91,7 @@
 #### Returns
 |name|type|description|
 |:-|:-|:-|
-|castles|list[list[tuple[int]]]|(城郭を表すタプル(頂点のタプル)のタプル)のタプル|
+|castles|list[list[tuple[int, int]]]|(城郭を表すタプル(頂点のタプル)のタプル)のタプル|
 
 ---
 
@@ -104,6 +106,21 @@
 #### Returns
 |name|type|description|
 |:-|:-|:-|
-|zones|list[tuple[int]]|領域判定したマス|
+|zones|list[tuple[int, int]]|領域判定したマス|
+
+---
+
+### update
+盤面をアップデートする(領域)
+
+#### Parameters
+|name|type|description|
+|:-|:-|:-|
+||||
+
+#### Returns
+|name|type|description|
+|:-|:-|:-|
+||||
 
 ---
