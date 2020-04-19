@@ -297,7 +297,7 @@ def test_judge_zone_7(judge, tops4_3, tops4_4):
     assert zones["teamB"] == {(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 1), (2, 6), (3, 1), (3, 6), (4, 1), (4, 6), (5, 1), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}
 
 
-def test_update(judge, mock_status, tops4_1):
+def test_update_1(judge, mock_status, tops4_1):
     judge.build_castle("O", tops4_1)
     judge.update()
     for i in range(3):
@@ -306,4 +306,19 @@ def test_update(judge, mock_status, tops4_1):
                 mock_status[i][j] = "+"
             else:
                 mock_status[i][j] = "O"
+    assert judge.field.status == mock_status
+
+
+def test_update_2(judge, mock_status, tops4_1, tops4_2):
+    judge.build_castle("O", tops4_1)
+    judge.build_castle("X", tops4_2)
+    judge.update()
+    for i in range(3):
+        for j in range(3):
+            if i == j == 1:
+                mock_status[i][j] = "+"
+                mock_status[i][j + 3] = "-"
+            else:
+                mock_status[i][j] = "O"
+                mock_status[i][j + 3] = "X"
     assert judge.field.status == mock_status
