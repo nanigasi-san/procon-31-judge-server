@@ -152,9 +152,15 @@ def test_calc_point_2(judge):
         judge.calc_point()
 
 
-# TODO: ここらへん別にまとめる
+# TODO: ここらへん別ファイルにまとめる
 def same_path(path_a, path_b):
-    return (path_a == path_b) or (path_a[::-1] == path_b)
+    if len(path_a) != len(path_b):
+        return False
+    for _ in range(len(path_a)):
+        if (path_a == path_b) or (path_a[::-1] == path_b):
+            return True
+        path_a.append(path_a.pop(0))
+    return False
 
 
 def reduction(path: tuple):
@@ -185,7 +191,7 @@ def test_judge_castle_2(judge, tops4_1):
     assert len(castles["teamA"]) == 1
     assert not(castles["teamB"])
     # TODO: ここのはんていもっと綺麗にできるループ回して(append(pop(0)))で毎回比較とか
-    assert same_path(sorted(reduction(castles["teamA"][0])), sorted(set(tops4_1)))
+    assert same_path(reduction(castles["teamA"][0]), tops4_1)
 
 
 def test_judge_castle_3(judge, tops4_2):
@@ -193,7 +199,7 @@ def test_judge_castle_3(judge, tops4_2):
     castles = judge.judge_castle()
     assert not(castles["teamA"])
     assert len(castles["teamB"]) == 1
-    assert same_path(sorted(reduction(castles["teamB"][0])), sorted(set(tops4_2)))
+    assert same_path(reduction(castles["teamB"][0]), tops4_2)
 
 
 def test_judge_zone_1(judge, tops4_1):
