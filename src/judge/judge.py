@@ -76,7 +76,7 @@ class Judge:
             return
 
     def judge_castle(self) -> Dict[str, List[List[Point]]]:
-        def dfs_gird(graph: List[List[str]], wall:str, start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
+        def dfs_gird(graph: List[List[str]], wall: str, start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
             seen = {start}
             todo: Deque[Point] = deque()
             todo.append(start)
@@ -111,7 +111,7 @@ class Judge:
                 except KeyError:
                     return []
 
-        res = {}
+        res: Dict[str, List[List[Point]]] = {}
         seen: List[List[Point]] = []
         for team in self.teams:
             res[team] = []
