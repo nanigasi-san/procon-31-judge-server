@@ -170,32 +170,34 @@ def reduction(path: tuple):
 
 def test_judge_castle_1(judge):
     castles = judge.judge_castle()
-    assert not(castles)
+    assert not(castles["teamA"])
+    assert not(castles["teamB"])
 
 
 def test_judge_castle_2(judge, tops):
     judge.build_castle("O", tops)
     castles = judge.judge_castle()
-    assert len(castles) == 1
-    assert same_path(sorted(reduction(castles[0])), sorted(set(tops)))
+    assert len(castles["teamA"]) == 1
+    assert same_path(sorted(reduction(castles["teamA"][0])), sorted(set(tops)))
+    assert not(castles["teamB"])
 
 
 def test_judge_zone_1(judge, tops):
     judge.build_castle("O", tops)
     zones = judge.judge_zone("O")
-    assert zones == {(1, 1), }
+    assert zones["teamA"] == {(1, 1), }
 
 
 def test_judge_zone_2(judge, tops6):
     judge.build_castle("O", tops6)
     zones = judge.judge_zone("O")
-    assert zones == {(1, 1), (1, 2), (2, 1)}
+    assert zones["teamA"] == {(1, 1), (1, 2), (2, 1)}
 
 
 def test_judge_zone_3(judge, tops8):
     judge.build_castle("O", tops8)
     zones = judge.judge_zone("O")
-    assert zones == {(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2)}
+    assert zones["teamA"] == {(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2)}
 
 
 def test_update(judge, mock_status, tops):

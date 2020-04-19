@@ -13,6 +13,6 @@ classDiagram
         +build_castle(): None
         +fill(): None
         +update(): None
-        +judge_castle(): list[list[tuple[int, int]]]
-        +judge_zone(): list[tuple[int, int]]
+        +judge_castle(): dict[str, list[list[tuple[int, int]]]]
+        +judge_zone(): dict[str, set[tuple[int, int]]]
     }

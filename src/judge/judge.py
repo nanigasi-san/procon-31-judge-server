@@ -10,6 +10,8 @@ class Judge:
     def __init__(self, field: Field, teams: Tuple[str, str]):
         self.field = field
         self.teams = teams
+        self.walls = {teams[0]: "O", teams[1]: "X"}
+        self.zone_mark = {teams[0]: "+", teams[1]: "-"}
 
     def calc_point(self) -> Dict[str, int]:
         points = [0, 0]
@@ -36,7 +38,6 @@ class Judge:
             raise ValueError("The castle must pass only once beyond the starting point and consist only of straight lines parallel to the x or y axis. {0} is an invalid entry.".format(tops))
         start = tops[0]
         tops = tops[:] + [start]
-        print("tops:", tops)
         for i in range(1, len(tops)):
             target = tops[i]
             if start[0] == target[0]:
@@ -74,8 +75,8 @@ class Judge:
                     self.field.status[x][y] = zone
             return
 
-    def judge_castle(self) -> List[List[Point]]:
-        def dfs_gird(graph: List[List[str]], start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
+    def judge_castle(self) -> Dict[str, List[List[Point]]]:
+        def dfs_gird(graph: List[List[str]], wall:str, start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
             seen = {start}
             todo: Deque[Point] = deque()
             todo.append(start)
@@ -88,7 +89,7 @@ class Judge:
                     if not ((0 <= nx < x_lim) and (0 <= ny < y_lim)):
                         continue
                     nxy = (nx, ny)
-                    if graph[nx][ny] == "O":
+                    if graph[nx][ny] == wall:
                         try:
                             if prev[(x, y)] == nxy:
                                 continue
@@ -110,34 +111,36 @@ class Judge:
                 except KeyError:
                     return []
 
-        res = []
+        res = {}
         seen: List[List[Point]] = []
-        for i in range(self.field.height):
-            for j in range(self.field.width):
-                start = (i, j)
-                prev = dfs_gird(self.field.status, start, self.field.height, self.field.height)
-                path = restore_path(start, prev)
-                expanded_path = sorted(set(path))
-                if path and expanded_path not in seen:
-                    res.append(path)
-                seen.append(expanded_path)
+        for team in self.teams:
+            res[team] = []
+            for i in range(self.field.height):
+                for j in range(self.field.width):
+                    start = (i, j)
+                    prev = dfs_gird(self.field.status, self.walls[team], start, self.field.height, self.field.height)
+                    path = restore_path(start, prev)
+                    expanded_path = sorted(set(path))
+                    if path and expanded_path not in seen:
+                        res[team].append(path)
+                    seen.append(expanded_path)
         return res
 
-    def judge_zone(self, wall: str) -> Set[Point]:
-        castle = self.judge_castle()[0]
+    def judge_zone(self, wall: str) -> Dict[str, Set[Point]]:
+        castles = self.judge_castle()
 
-        def sfs(graph: List[List[str]], start: Point, x_lim: int, y_lim: int) -> List[List[Point]]:
+        def sfs(graph: List[List[str]], wall: str, start: Point, x_lim: int, y_lim: int) -> List[List[Point]]:
             res: List[List[Point]] = [[] for _ in range(4)]
             one_steps = ((1, 0), (-1, 0), (0, 1), (0, -1))
             for i in range(4):
                 x, y = start
-                if graph[x][y] == "O":
+                if graph[x][y] == wall:
                     break
                 dx, dy = one_steps[i]
                 while (0 <= x + dx < x_lim) and (0 <= y + dy < y_lim):
                     x += dx
                     y += dy
-                    if graph[x][y] == "O":
+                    if graph[x][y] == wall:
                         res[i].append((x, y))
             return res
 
@@ -149,17 +152,22 @@ class Judge:
                             if (a in castle) and (b in castle) and (c in castle) and (d in castle):
                                 return True
             return False
-        zones: Set[Point] = set()
-        for x in range(self.field.height):
-            for y in range(self.field.width):
-                p = sfs(self.field.status, (x, y), self.field.height, self.field.width)
-                if check_union(p, castle):
-                    zones.add((x, y))
+        zones: Dict[str, Set[Point]] = {}
+        for team in self.teams:
+            zones[team] = set()
+            for x in range(self.field.height):
+                for y in range(self.field.width):
+                    p = sfs(self.field.status, self.walls[team], (x, y), self.field.height, self.field.width)
+                    for castle in castles[team]:
+                        if check_union(p, castle):
+                            zones[team].add((x, y))
+                            break
         return zones
 
     def update(self) -> None:
-        for x, y in self.judge_zone("O"):
-            self.field.status[x][y] = "+"
+        for team in self.teams:
+            for x, y in self.judge_zone(self.walls[team])[team]:
+                self.field.status[x][y] = self.zone_mark[team]
         return
 
 
