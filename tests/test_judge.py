@@ -201,6 +201,16 @@ def test_judge_castle_3(judge, tops4_2):
     assert same_path(reduction(castles["teamB"][0]), tops4_2)
 
 
+def test_judge_zone_4(judge, tops4_1, tops4_2):
+    judge.build_castle("O", tops4_1)
+    judge.build_castle("X", tops4_2)
+    castles = judge.judge_castle()
+    assert len(castles["teamA"]) == 1
+    assert len(castles["teamB"]) == 1
+    assert same_path(reduction(castles["teamA"][0]), tops4_1)
+    assert same_path(reduction(castles["teamB"][0]), tops4_2)
+
+
 def test_judge_zone_1(judge, tops4_1):
     judge.build_castle("O", tops4_1)
     zones = judge.judge_zone("O")
