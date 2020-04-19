@@ -152,7 +152,7 @@ class Judge:
                             if (a in castle) and (b in castle) and (c in castle) and (d in castle):
                                 return True
             return False
-        
+
         zones: DefaultDict[str, Set[Point]] = defaultdict(set)
         parent_castle: Dict[Point, Tuple[str, List[Point]]] = {}
         for x in range(self.field.height):
