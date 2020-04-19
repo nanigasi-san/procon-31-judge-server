@@ -103,7 +103,7 @@
 #### Parameters
 |name|type|description|
 |:-|:-|:-|
-|wall|str|城壁を表す文字|
+||||
 
 #### Returns
 |name|type|description|
