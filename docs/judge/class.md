@@ -7,7 +7,6 @@
 |width|int|盤面の幅|
 |base_point|list[list[int]]|マスの素点を表す二次元配列|
 |status|list[list[str]]|マスの状態を表す二次元配列(*、O, X, +, -)|
-|team|list[str]|チーム名のリスト(サイズ2)|
 
 ## methods
 |name|type|description|
@@ -21,7 +20,10 @@
 ## Attributes
 |name|type|description|
 |:-|:-|:-|
+|field|Field|フィールド|
 |team|tuple[str, str]|チーム名|
+|wall_mark|tuple[str, str]|城壁を表す文字のタプル|
+|zone_mark|tuple[str, str]|領域を表す文字のタプル|
 
 ## methods
 |name|type|description|
@@ -106,7 +108,7 @@
 #### Returns
 |name|type|description|
 |:-|:-|:-|
-|zones|list[tuple[int, int]]|領域判定したマス|
+|zones|set[tuple[int, int]]|領域判定したマス|
 
 ---
 

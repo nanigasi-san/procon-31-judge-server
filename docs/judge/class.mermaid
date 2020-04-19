@@ -9,6 +9,8 @@ classDiagram
     class Judge {
         +Field field
         +tuple[str, str] teams
+        +tuple[str, str] wall_mark
+        +tuple[str, str] zone_mark
         +calc_point(): dict[str, int]
         +build_castle(): None
         +fill(): None
