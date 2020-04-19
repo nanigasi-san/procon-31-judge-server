@@ -13,8 +13,13 @@ def mock_status():
 
 
 @pytest.fixture
-def tops():
+def tops4_1():
     return [(0, 0), (0, 2), (2, 2), (2, 0)]
+
+
+@pytest.fixture
+def tops4_2():
+    return [(0, 3), (0, 5), (2, 5), (2, 3)]
 
 
 @pytest.fixture
@@ -36,8 +41,8 @@ def test_init_teams(judge):
     assert judge.teams[1] == "teamB"
 
 
-def test_build_castle_1(judge, mock_status, tops):
-    judge.build_castle("O", tops)
+def test_build_castle_1(judge, mock_status, tops4_1):
+    judge.build_castle("O", tops4_1)
 
     for i in range(3):
         for j in range(3):
@@ -81,9 +86,9 @@ def test_build_castle_5(judge, mock_status, tops6):
     assert judge.field.status == mock_status
 
 
-def test_fill_1(judge, mock_status, tops):
-    judge.build_castle("O", tops)
-    judge.fill("O", "+", tops)
+def test_fill_1(judge, mock_status, tops4_1):
+    judge.build_castle("O", tops4_1)
+    judge.fill("O", "+", tops4_1)
 
     for i in range(3):
         for j in range(3):
@@ -100,11 +105,11 @@ def test_fill_2(judge):
         judge.fill("O", "+", uncorrect_tops)
 
 
-def test_fill_3(judge, mock_status, tops):
+def test_fill_3(judge, mock_status, tops4_1):
     sub_tops = [(0, 3), (0, 5), (2, 5), (2, 3)]
-    judge.build_castle("O", tops)
+    judge.build_castle("O", tops4_1)
     judge.build_castle("O", sub_tops)
-    judge.fill("O", "+", tops)
+    judge.fill("O", "+", tops4_1)
     judge.fill("O", "+", sub_tops)
 
     for i in range(3):
@@ -118,9 +123,9 @@ def test_fill_3(judge, mock_status, tops):
     assert judge.field.status == mock_status
 
 
-def test_calc_point_1(judge, tops):
-    judge.build_castle("O", tops)
-    judge.fill("O", "+", tops)
+def test_calc_point_1(judge, tops4_1):
+    judge.build_castle("O", tops4_1)
+    judge.fill("O", "+", tops4_1)
     Xtops = [(0, 3), (0, 5), (2, 5), (2, 3)]
     judge.build_castle("X", Xtops)
     judge.fill("X", "-", Xtops)
@@ -174,16 +179,25 @@ def test_judge_castle_1(judge):
     assert not(castles["teamB"])
 
 
-def test_judge_castle_2(judge, tops):
-    judge.build_castle("O", tops)
+def test_judge_castle_2(judge, tops4_1):
+    judge.build_castle("O", tops4_1)
     castles = judge.judge_castle()
     assert len(castles["teamA"]) == 1
-    assert same_path(sorted(reduction(castles["teamA"][0])), sorted(set(tops)))
     assert not(castles["teamB"])
+    # TODO: ここのはんていもっと綺麗にできるループ回して(append(pop(0)))で毎回比較とか
+    assert same_path(sorted(reduction(castles["teamA"][0])), sorted(set(tops4_1)))
 
 
-def test_judge_zone_1(judge, tops):
-    judge.build_castle("O", tops)
+def test_judge_castle_3(judge, tops4_2):
+    judge.build_castle("X", tops4_2)
+    castles = judge.judge_castle()
+    assert not(castles["teamA"])
+    assert len(castles["teamB"]) == 1
+    assert same_path(sorted(reduction(castles["teamB"][0])), sorted(set(tops4_2)))
+
+
+def test_judge_zone_1(judge, tops4_1):
+    judge.build_castle("O", tops4_1)
     zones = judge.judge_zone("O")
     assert zones["teamA"] == {(1, 1), }
 
@@ -200,8 +214,8 @@ def test_judge_zone_3(judge, tops8):
     assert zones["teamA"] == {(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 2), (3, 6), (4, 2), (4, 6), (5, 2)}
 
 
-def test_update(judge, mock_status, tops):
-    judge.build_castle("O", tops)
+def test_update(judge, mock_status, tops4_1):
+    judge.build_castle("O", tops4_1)
     judge.update()
     for i in range(3):
         for j in range(3):
