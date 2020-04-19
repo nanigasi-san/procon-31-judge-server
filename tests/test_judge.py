@@ -293,8 +293,8 @@ def test_judge_zone_7(judge, tops4_3, tops4_4):
     zones = judge.judge_zone()
     assert len(zones["teamA"]) == 4
     assert len(zones["teamB"]) == 20
-    assert zones["teamB"] == {(3, 3), (3, 4), (4, 3), (4, 4)}
-    assert zones["teamA"] == {(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 1), (2, 6), (3, 1), (3, 6), (4, 1), (4, 6), (5, 1), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}
+    assert zones["teamA"] == {(3, 3), (3, 4), (4, 3), (4, 4)}
+    assert zones["teamB"] == {(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 1), (2, 6), (3, 1), (3, 6), (4, 1), (4, 6), (5, 1), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}
 
 
 def test_update(judge, mock_status, tops4_1):
