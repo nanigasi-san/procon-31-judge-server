@@ -1,9 +1,6 @@
-from .field import Field
+from .field import Field, Point, Grid
 from collections import deque, defaultdict
 from typing import List, Dict, Tuple, Set, Deque, DefaultDict
-
-# IDEA: namedtupleの方がよい？
-Point = Tuple[int, int]
 
 
 class Judge:
@@ -14,23 +11,23 @@ class Judge:
         self.zone_mark = {teams[0]: "+", teams[1]: "-"}
 
     def calc_point(self) -> Dict[str, int]:
-        points = [0, 0]
-        for x in range(self.field.height):
-            for y in range(self.field.width):
-                cell = self.field.status[x][y]
-                if cell == "*":
-                    pass
-                elif cell == "O":
-                    points[0] += self.field.base_point[x][y]
-                elif cell == "X":
-                    points[1] += self.field.base_point[x][y]
-                elif cell == "+":
-                    points[0] += abs(self.field.base_point[x][y])
-                elif cell == "-":
-                    points[1] += abs(self.field.base_point[x][y])
-                else:
-                    raise CellError("this cell({0}, {1}) has \"{2}\". It is not supposed field.status.".format(x, y, cell))
-        return {team_name: point for team_name, point in zip(self.teams, points)}
+        team_point: Dict[str, int] = {team: 0 for team in self.teams}
+        for point in Point.gen_all_points(*self.field.size):
+            cell = self.field.status.at(point)
+            if cell == "*":
+                pass
+            elif cell == "O":
+                team_point[self.teams[0]] += self.field.base_point.at(point)
+            elif cell == "+":
+                team_point[self.teams[0]] += abs(self.field.base_point.at(point))
+            elif cell == "X":
+                team_point[self.teams[1]] += self.field.base_point.at(point)
+            elif cell == "-":
+                team_point[self.teams[1]] += abs(self.field.base_point.at(point))
+            else:
+                raise CellError("this cell{0} has \"{1}\". It is not supposed field.status.".format(point, cell))
+
+        return team_point
 
     def build_castle(self, wall: str, tops: List[Point]) -> None:
         # 城郭の最小構成は正方形なので、頂点が4つ未満なら不正
@@ -40,20 +37,20 @@ class Judge:
         tops = tops[:] + [start]
         for i in range(1, len(tops)):
             target = tops[i]
-            if start[0] == target[0]:
-                if target[1] >= start[1]:
-                    for dy in range(target[1] - start[1] + 1):
-                        self.field.status[start[0]][start[1] + dy] = wall
+            if start.x == target.x:
+                if target.y >= start.y:
+                    for dy in range(target.y - start.y + 1):
+                        self.field.status[start.x][start.y + dy] = wall
                 else:
-                    for dy in range(start[1] - target[1]):
-                        self.field.status[start[0]][start[1] - dy] = wall
-            elif start[1] == target[1]:
-                if target[0] >= start[0]:
-                    for dx in range(target[0] - start[0] + 1):
-                        self.field.status[start[0] + dx][start[1]] = wall
+                    for dy in range(start.y - target.y):
+                        self.field.status[start.x][start.y - dy] = wall
+            elif start.y == target.y:
+                if target.x >= start.x:
+                    for dx in range(target.x - start.x + 1):
+                        self.field.status[start.x + dx][start.y] = wall
                 else:
-                    for dx in range(start[0] - target[0]):
-                        self.field.status[start[0] - dx][start[1]] = wall
+                    for dx in range(start.x - target.x):
+                        self.field.status[start.x - dx][start.y] = wall
             else:
                 raise ValueError("tops must be identical in x or y in each of its neighbors. (e.g., (0, 0)->(0, 3), (3, 5) -> (1, 5)).\n{0} -> {1} is not correct.".format(start, target))
             start = target
@@ -61,44 +58,40 @@ class Judge:
     def fill(self, wall: str, zone: str, tops: List[Point]) -> None:
         # validation
         for i in range(len(tops) - 1):
-            if tops[i][0] != tops[i + 1][0] and tops[i][1] != tops[i + 1][1]:
+            if tops[i].x != tops[i + 1].x and tops[i].y != tops[i + 1].y:
                 raise ValueError("tops must be identical in x or y in each of its neighbors. (e.g., (0, 0)->(0, 3), (3, 5) -> (1, 5)).\n{0} -> {1} is not correct.".format(tops[i], tops[i + 1]))
 
-        # TODO: 5頂点以上の城郭判定
         if len(tops) == 4:  # 長方形
             tops = tops[:] + [tops[0]]
-            xlist, ylist = [tops[i][0] for i in range(len(tops))], [tops[i][1] for i in range(len(tops))]
+            xlist, ylist = [tops[i].x for i in range(len(tops))], [tops[i].y for i in range(len(tops))]
             mnx, mxx = min(xlist), max(xlist)
             mny, mxy = min(ylist), max(ylist)
             for x in range(mnx + 1, mxx):
                 for y in range(mny + 1, mxy):
                     self.field.status[x][y] = zone
-            return
 
     def judge_castle(self) -> Dict[str, List[List[Point]]]:
-        def dfs_gird(graph: List[List[str]], wall: str, start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
-            seen = {start}
-            todo: Deque[Point] = deque()
-            todo.append(start)
+        def dfs_gird(graph: Grid[str], wall: str, start: Point, x_lim: int, y_lim: int) -> Dict[Point, Point]:
+            seen: Set[Point] = {start}
+            todo: Deque[Point] = deque([start])
             prev: Dict[Point, Point] = {}  # 経路復元
             one_steps = ((1, 0), (-1, 0), (0, 1), (0, -1))
             while todo:
-                x, y = todo.pop()
-                for dx, dy in one_steps:
-                    nx, ny = x + dx, y + dy
-                    if not ((0 <= nx < x_lim) and (0 <= ny < y_lim)):
+                now = todo.pop()
+                for dxy in one_steps:
+                    target = now.update(dxy)
+                    if not ((0 <= target.x < x_lim) and (0 <= target.y < y_lim)):
                         continue
-                    nxy = (nx, ny)
-                    if graph[nx][ny] == wall:
+                    if graph.at(target) == wall:
                         try:
-                            if prev[(x, y)] == nxy:
+                            if prev[now] == target:
                                 continue
                         except KeyError:
                             pass
-                        prev[nxy] = (x, y)
-                        if nxy not in seen:
-                            todo.append(nxy)
-                            seen.add(nxy)
+                        prev[target] = now
+                        if target not in seen:
+                            todo.append(target)
+                            seen.add(target)
             return prev
 
         def restore_path(start: Point, prev: Dict[Point, Point]) -> List[Point]:
@@ -111,72 +104,64 @@ class Judge:
                 except KeyError:
                     return []
 
-        res: Dict[str, List[List[Point]]] = {}
+        res: Dict[str, List[List[Point]]] = {team: [] for team in self.teams}
         seen: List[List[Point]] = []
         for team in self.teams:
-            res[team] = []
-            for i in range(self.field.height):
-                for j in range(self.field.width):
-                    start = (i, j)
-                    prev = dfs_gird(self.field.status, self.wall_mark[team], start, self.field.height, self.field.height)
-                    path = restore_path(start, prev)
-                    expanded_path = sorted(set(path))
-                    if path and expanded_path not in seen:
-                        res[team].append(path)
-                    seen.append(expanded_path)
+            for start in Point.gen_all_points(*self.field.size):
+                prev = dfs_gird(self.field.status, self.wall_mark[team], start, *self.field.size)
+                path = restore_path(start, prev)
+                expanded_path = sorted(set(path))
+                if path and expanded_path not in seen:
+                    res[team].append(path)
+                seen.append(expanded_path)
         return res
 
     def judge_zone(self) -> Dict[str, Set[Point]]:
         castles = self.judge_castle()
 
-        def sfs(graph: List[List[str]], wall: str, start: Point, x_lim: int, y_lim: int) -> List[List[Point]]:
+        def sfs_grid(graph: Grid[str], wall: str, start: Point, x_lim: int, y_lim: int) -> List[List[Point]]:
             res: List[List[Point]] = [[] for _ in range(4)]
             one_steps = ((1, 0), (-1, 0), (0, 1), (0, -1))
-            for i in range(4):
-                x, y = start
-                if graph[x][y] in self.wall_mark.values():  # 城壁は領域になりえない
-                    break
-                dx, dy = one_steps[i]
-                while (0 <= x + dx < x_lim) and (0 <= y + dy < y_lim):
-                    x += dx
-                    y += dy
-                    if graph[x][y] == wall:
-                        res[i].append((x, y))
+            if graph.at(start) in self.wall_mark.values():  # 城壁だった時
+                return []
+            for dxy, path in zip(one_steps, res):
+                target = start.update(dxy)
+                while (0 <= target.x < x_lim) and (0 <= target.y < y_lim):
+                    if graph.at(target) == wall:
+                        path.append(target)
+                    target = target.update(dxy)
             return res
 
-        def check_union(points: List[List[Point]], castle: List[Point]) -> bool:
-            for a in points[0]:
-                for b in points[1]:
-                    for c in points[2]:
-                        for d in points[3]:
-                            if (a in castle) and (b in castle) and (c in castle) and (d in castle):
-                                return True
-            return False
+        def check_union(points_4: List[List[Point]], castle: List[Point]) -> bool:
+            if not points_4:
+                raise ValueError("takes empty list")
+
+            def common_walls(points: List[Point]) -> Set[Point]:
+                return set(points) & set(castle)
+
+            return all(map(common_walls, points_4))
 
         zones: DefaultDict[str, Set[Point]] = defaultdict(set)
         parent_castle: Dict[Point, Tuple[str, List[Point]]] = {}
-        for x in range(self.field.height):
-            for y in range(self.field.width):
-                xy = (x, y)
-                for team in self.teams:
-                    p = sfs(self.field.status, self.wall_mark[team], xy, self.field.height, self.field.width)
-                    for castle in castles[team]:
-                        if check_union(p, castle):
-                            if xy not in parent_castle.keys():
-                                parent_castle[xy] = (team, castle)
-                                zones[team].add(xy)
-                            else:
-                                if len(parent_castle[xy][1]) > len(castle):
-                                    zones[parent_castle[xy][0]].remove(xy)
-                                    zones[team].add(xy)
-                                    parent_castle[xy] = (team, castle)
+        for point in Point.gen_all_points(*self.field.size):
+            for team in self.teams:
+                p = sfs_grid(self.field.status, self.wall_mark[team], point, *self.field.size)
+                for castle in castles[team]:
+                    if p and check_union(p, castle):
+                        if (point in parent_castle.keys()):
+                            if (len(parent_castle[point][1]) > len(castle)):
+                                zones[parent_castle[point][0]].remove(point)
+                                zones[team].add(point)
+                                parent_castle[point] = (team, castle)
+                        else:
+                            parent_castle[point] = (team, castle)
+                            zones[team].add(point)
         return zones
 
     def update(self) -> None:
         for team in self.teams:
-            for x, y in self.judge_zone()[team]:
-                self.field.status[x][y] = self.zone_mark[team]
-        return
+            for point in self.judge_zone()[team]:
+                self.field.status[point.x][point.y] = self.zone_mark[team]
 
 
 class CellError(Exception):

@@ -1,5 +1,11 @@
 import pytest
-from judge import Judge, CellError
+from judge import Judge, CellError, Point
+
+
+def convert_point(tops):
+    def _point(tops):
+        return Point(*tops)
+    return list(map(_point, tops))
 
 
 @pytest.fixture
@@ -14,32 +20,32 @@ def mock_status():
 
 @pytest.fixture
 def tops4_1():
-    return [(0, 0), (0, 2), (2, 2), (2, 0)]
+    return convert_point([(0, 0), (0, 2), (2, 2), (2, 0)])
 
 
 @pytest.fixture
 def tops4_2():
-    return [(0, 3), (0, 5), (2, 5), (2, 3)]
+    return convert_point([(0, 3), (0, 5), (2, 5), (2, 3)])
 
 
 @pytest.fixture
 def tops4_3():
-    return [(0, 0), (0, 7), (7, 7), (7, 0)]
+    return convert_point([(0, 0), (0, 7), (7, 7), (7, 0)])
 
 
 @pytest.fixture
 def tops4_4():
-    return [(2, 2), (2, 5), (5, 5), (5, 2)]
+    return convert_point([(2, 2), (2, 5), (5, 5), (5, 2)])
 
 
 @pytest.fixture
 def tops6():
-    return [(0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0)]
+    return convert_point([(0, 0), (0, 3), (2, 3), (2, 2), (3, 2), (3, 0)])
 
 
 @pytest.fixture
 def tops8():
-    return [(1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1)]
+    return convert_point([(1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1)])
 
 
 def test_init_judge(judge, field):
@@ -65,17 +71,17 @@ def test_build_castle_1(judge, mock_status, tops4_1):
 
 def test_build_castle_2(judge):
     with pytest.raises(ValueError):
-        judge.build_castle("O", [(0, 0), (2, 4), (0, 4), (4, 0)])
+        judge.build_castle("O", convert_point([(0, 0), (2, 4), (0, 4), (4, 0)]))
 
 
 def test_build_castle_3(judge):
     with pytest.raises(ValueError):
-        judge.build_castle("O", [(0, 0), (0, 2)])
+        judge.build_castle("O", convert_point([(0, 0), (0, 2)]))
 
 
 def test_build_castle_4(judge):
     with pytest.raises(ValueError):
-        judge.build_castle("O", [(0, 0), (0, 2), (2, 2)])
+        judge.build_castle("O", convert_point([(0, 0), (0, 2), (2, 2)]))
 
 
 def test_build_castle_5(judge, mock_status, tops6):
@@ -110,13 +116,13 @@ def test_fill_1(judge, mock_status, tops4_1):
 
 
 def test_fill_2(judge):
-    uncorrect_tops = [(0, 0), (0, 2), (2, 3), (2, 0)]
+    uncorrect_tops = convert_point([(0, 0), (0, 2), (2, 3), (2, 0)])
     with pytest.raises(ValueError):
         judge.fill("O", "+", uncorrect_tops)
 
 
 def test_fill_3(judge, mock_status, tops4_1):
-    sub_tops = [(0, 3), (0, 5), (2, 5), (2, 3)]
+    sub_tops = convert_point([(0, 3), (0, 5), (2, 5), (2, 3)])
     judge.build_castle("O", tops4_1)
     judge.build_castle("O", sub_tops)
     judge.fill("O", "+", tops4_1)
@@ -136,7 +142,7 @@ def test_fill_3(judge, mock_status, tops4_1):
 def test_calc_point_1(judge, tops4_1):
     judge.build_castle("O", tops4_1)
     judge.fill("O", "+", tops4_1)
-    Xtops = [(0, 3), (0, 5), (2, 5), (2, 3)]
+    Xtops = convert_point([(0, 3), (0, 5), (2, 5), (2, 3)])
     judge.build_castle("X", Xtops)
     judge.fill("X", "-", Xtops)
 
@@ -162,7 +168,7 @@ def test_calc_point_2(judge):
         judge.calc_point()
 
 
-# TODO: ここらへん別ファイルにまとめる
+# TODO: ここらへんPathクラスを実装したほうがいい
 def same_path(path_a, path_b):
     if len(path_a) != len(path_b):
         return False

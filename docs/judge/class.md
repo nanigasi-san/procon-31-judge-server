@@ -46,7 +46,7 @@
 #### Returns
 |name|type|description|
 |:-|:-|:-|
-||dict[str, int]|各チームの得点。`チーム名:得点`の形式で格納される|
+|team_point|dict[str, int]|各チームの得点。`チーム名:得点`の形式で格納される|
 
 ---
 
