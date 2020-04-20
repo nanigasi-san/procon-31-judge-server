@@ -1,5 +1,5 @@
 import pytest
-from judge import Point, Grid
+from judge.field import Point, Grid
 
 
 @pytest.fixture
@@ -28,8 +28,8 @@ def test_point_immutable_2(point):
         point.y = 1
 
 
-def test_point_update(point):
-    assert point.update((1, 1)) == (1, 1)
+def test_point_add(point):
+    assert point.add((1, 1)) == (1, 1)
 
 
 def test_point_gen_all_points():

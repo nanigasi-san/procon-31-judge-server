@@ -7,7 +7,7 @@ class Point(NamedTuple):
     x: int
     y: int
 
-    def update(self, diff: Tuple[int, int]) -> "Point":
+    def add(self, diff: Tuple[int, int]) -> "Point":
         return Point(self.x + diff[0], self.y + diff[1])
 
     @staticmethod

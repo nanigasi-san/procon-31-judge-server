@@ -3,6 +3,39 @@ from collections import deque, defaultdict
 from typing import List, Dict, Tuple, Set, Deque, DefaultDict
 
 
+class Path(List[Point]):
+    def __init__(self, path: List[Point] = []):
+        for point in path:
+            self.append(point)
+
+    def reduction(self) -> "Path":
+        def calc_diff(before: Point, after: Point) -> Tuple[int, int]:
+            return (after.x - before.x, after.y - before.y)
+
+        if not self:
+            return Path()
+        reducted_path = Path()
+        before_diff = calc_diff(self[-2], self[-1])
+        for i in range(len(self) - 1):
+            diff = calc_diff(self[i % len(self)], self[(i + 1) % len(self)])
+            if diff != before_diff:
+                reducted_path.append(self[i])
+            before_diff = diff
+        return reducted_path
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, list):
+            return False
+        path_a = self[:]
+        if len(path_a) != len(other):
+            return False
+        for _ in range(len(path_a)):
+            if (path_a == other) or (path_a[::-1] == other):
+                return True
+            path_a.append(path_a.pop(0))
+        return False
+
+
 class Judge:
     def __init__(self, field: Field, teams: Tuple[str, str]):
         self.field = field
@@ -79,7 +112,7 @@ class Judge:
             while todo:
                 now = todo.pop()
                 for dxy in one_steps:
-                    target = now.update(dxy)
+                    target = now.add(dxy)
                     if not ((0 <= target.x < x_lim) and (0 <= target.y < y_lim)):
                         continue
                     if graph.at(target) == wall:
@@ -95,7 +128,7 @@ class Judge:
             return prev
 
         def restore_path(start: Point, prev: Dict[Point, Point]) -> List[Point]:
-            path = [start]
+            path = Path([start])
             while True:
                 try:
                     path.append(prev[path[-1]])
@@ -125,11 +158,11 @@ class Judge:
             if graph.at(start) in self.wall_mark.values():  # 城壁だった時
                 return []
             for dxy, path in zip(one_steps, res):
-                target = start.update(dxy)
+                target = start.add(dxy)
                 while (0 <= target.x < x_lim) and (0 <= target.y < y_lim):
                     if graph.at(target) == wall:
                         path.append(target)
-                    target = target.update(dxy)
+                    target = target.add(dxy)
             return res
 
         def check_union(points_4: List[List[Point]], castle: List[Point]) -> bool:

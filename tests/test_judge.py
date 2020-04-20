@@ -1,5 +1,6 @@
 import pytest
-from judge import Judge, CellError, Point
+from judge.field import Point
+from judge.judge import Judge, CellError
 
 
 def convert_point(tops):
@@ -168,33 +169,6 @@ def test_calc_point_2(judge):
         judge.calc_point()
 
 
-# TODO: ここらへんPathクラスを実装したほうがいい
-def same_path(path_a, path_b):
-    if len(path_a) != len(path_b):
-        return False
-    for _ in range(len(path_a)):
-        if (path_a == path_b) or (path_a[::-1] == path_b):
-            return True
-        path_a.append(path_a.pop(0))
-    return False
-
-
-def reduction(path: tuple):
-    def calc_diff(before: tuple, after: tuple):
-        return (after[0] - before[0], after[1] - before[1])
-
-    if not path:
-        return []
-    reducted_path = []
-    before_diff = calc_diff(path[-2], path[-1])
-    for i in range(len(path) - 1):
-        diff = calc_diff(path[i % len(path)], path[(i + 1) % len(path)])
-        if diff != before_diff:
-            reducted_path.append(path[i])
-        before_diff = diff
-    return reducted_path
-
-
 def test_judge_castle_1(judge):
     castles = judge.judge_castle()
     assert not(castles["teamA"])
@@ -206,7 +180,7 @@ def test_judge_castle_2(judge, tops4_1):
     castles = judge.judge_castle()
     assert len(castles["teamA"]) == 1
     assert not(castles["teamB"])
-    assert same_path(reduction(castles["teamA"][0]), tops4_1)
+    assert castles["teamA"][0].reduction() == tops4_1
 
 
 def test_judge_castle_3(judge, tops4_2):
@@ -214,7 +188,7 @@ def test_judge_castle_3(judge, tops4_2):
     castles = judge.judge_castle()
     assert not(castles["teamA"])
     assert len(castles["teamB"]) == 1
-    assert same_path(reduction(castles["teamB"][0]), tops4_2)
+    assert castles["teamB"][0].reduction() == tops4_2
 
 
 def test_judge_castle_4(judge, tops4_1, tops4_2):
@@ -223,8 +197,8 @@ def test_judge_castle_4(judge, tops4_1, tops4_2):
     castles = judge.judge_castle()
     assert len(castles["teamA"]) == 1
     assert len(castles["teamB"]) == 1
-    assert same_path(reduction(castles["teamA"][0]), tops4_1)
-    assert same_path(reduction(castles["teamB"][0]), tops4_2)
+    assert castles["teamA"][0].reduction() == tops4_1
+    assert castles["teamB"][0].reduction() == tops4_2
 
 
 def test_judge_castle_5(judge, tops4_3, tops4_4):
@@ -233,8 +207,8 @@ def test_judge_castle_5(judge, tops4_3, tops4_4):
     castles = judge.judge_castle()
     assert len(castles["teamA"]) == 1
     assert len(castles["teamB"]) == 1
-    assert same_path(reduction(castles["teamA"][0]), tops4_3)
-    assert same_path(reduction(castles["teamB"][0]), tops4_4)
+    assert castles["teamA"][0].reduction() == tops4_3
+    assert castles["teamB"][0].reduction() == tops4_4
 
 
 def test_judge_castle_6(judge, tops4_3, tops4_4):
@@ -243,8 +217,8 @@ def test_judge_castle_6(judge, tops4_3, tops4_4):
     castles = judge.judge_castle()
     assert len(castles["teamA"]) == 1
     assert len(castles["teamB"]) == 1
-    assert same_path(reduction(castles["teamB"][0]), tops4_3)
-    assert same_path(reduction(castles["teamA"][0]), tops4_4)
+    assert castles["teamB"][0].reduction() == tops4_3
+    assert castles["teamA"][0].reduction() == tops4_4
 
 
 def test_judge_zone_1(judge, tops4_1):
