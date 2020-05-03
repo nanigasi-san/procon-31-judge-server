@@ -1,12 +1,18 @@
 import pytest
 from judge.field import Point
-from judge.judge import Judge, CellError
+from judge.judge import Path, Judge, CellError
+from judge.agent import Agent
 
 
 def convert_point(tops):
     def _point(tops):
         return Point(*tops)
     return list(map(_point, tops))
+
+
+@pytest.fixture
+def path():
+    return Path([Point(0, 0), Point(0, 4), Point(3, 4), Point(3, 0)])
 
 
 @pytest.fixture
@@ -49,6 +55,28 @@ def tops8():
     return convert_point([(1, 1), (1, 7), (5, 7), (5, 5), (3, 5), (3, 3), (6, 3), (6, 1)])
 
 
+def test_path_reduction_empty_1():
+    path = Path([])
+    assert not path.reduction()
+
+
+def test_path_reduction_empty_2():
+    path = Path()
+    assert not path.reduction()
+
+
+def test_path_eq_1(path):
+    assert not path == tuple(path)
+
+
+def test_path_eq_2(path):
+    assert not path == path[:-1]
+
+
+def test_path_eq_3(path):
+    assert not path == Path([Point(0, 0), Point(2, 0), Point(2, 4), Point(0, 4)])
+
+
 def test_init_judge(judge, field):
     assert judge.field == field
 
@@ -56,6 +84,12 @@ def test_init_judge(judge, field):
 def test_init_teams(judge):
     assert judge.teams[0] == "teamA"
     assert judge.teams[1] == "teamB"
+
+
+def test_init_gen_agent(judge):
+    for team in judge.teams:
+        for agent in judge.agents[team]:
+            assert isinstance(agent, Agent)
 
 
 def test_build_castle_1(judge, mock_status, tops4_1):
@@ -302,3 +336,169 @@ def test_update_2(judge, mock_status, tops4_1, tops4_2):
                 mock_status[i][j] = "O"
                 mock_status[i][j + 3] = "X"
     assert judge.field.status == mock_status
+
+
+def test_submit_agents_activity_placement_1(judge):
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/placement/data1.json")
+    for point in Point.gen_all_points(2, 6):
+        assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_placement_2(judge):
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/placement/data2.json")
+    for point in Point.gen_all_points(2, 6):
+        if point == Point(0, 0):
+            assert temp_grid.at(point) == 0
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_placement_3(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/placement/data3.json")
+    for point in Point.gen_all_points(2, 6):
+        assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_placement_4(judge):
+    judge.field.status[0][0] = "X"
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/placement/data4.json")
+    for point in Point.gen_all_points(2, 6):
+        if point == Point(0, 0):
+            assert temp_grid.at(point) == 0
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_placement_5(judge):
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/placement/data5.json")
+    for point in Point.gen_all_points(2, 6):
+        if point == Point(0, 0):
+            assert temp_grid.at(point) == 0
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_move_1(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/move/data1.json")
+    for point in Point.gen_all_points(2, 6):
+        if point == Point(0, 0):
+            assert temp_grid.at(point) == 0
+        elif point == Point(1, 0):
+            assert temp_grid.at(point) == 2
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_move_2(judge):
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/move/data2.json")
+    for point in Point.gen_all_points(2, 6):
+        if point == Point(0, 0):
+            assert temp_grid.at(point) == 0
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_move_3(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/move/data3.json")
+    for point in Point.gen_all_points(2, 6):
+        assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_move_4(judge):
+    judge.field.status[0][6] = "X"
+    temp_agent = judge.agents["teamA"][5]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 5)
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/move/data4.json")
+    for point in Point.gen_all_points(2, 7):
+        if point.y == 6:
+            assert temp_grid.at(point) == 0
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_remove_1(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+    judge.field.status[1][0] = "X"
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/remove/data1.json")
+    assert temp_grid.at(Point(0, 0)) == 1
+    assert temp_grid.at(Point(1, 0)) == 1
+
+
+def test_submit_agents_activity_remove_2(judge):
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/remove/data2.json")
+    assert temp_grid.at(Point(0, 0)) == 0
+
+
+def test_submit_agents_activity_remove_3(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/remove/data3.json")
+    assert temp_grid[-1][0] == 0
+    assert temp_grid.at(Point(0, 0)) == 1
+
+
+def test_submit_agents_activity_remove_4(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/remove/data4.json")
+    assert temp_grid.at(Point(0, 0)) == 1
+    assert temp_grid.at(Point(1, 0)) == 0
+
+
+def test_submit_agents_activity_other_1(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/other/data1.json")
+    for point in Point.gen_all_points(2, 6):
+        assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_other_2(judge):
+    temp_agent = judge.agents["teamA"][0]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 0)
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/other/data2.json")
+    for point in Point.gen_all_points(2, 6):
+        assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_missing_agent_1(judge):
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/missing_agent/data1.json")
+    assert not judge.agents["teamA"][5].on_field
+    for point in Point.gen_all_points(2, 6):
+        if point == Point(0, 5):
+            assert temp_grid.at(point) == 0
+        else:
+            assert temp_grid.at(point) == 1
+
+
+def test_submit_agents_activity_missing_agent_2(judge):
+    temp_agent = judge.agents["teamA"][5]
+    temp_agent.on_field = True
+    temp_agent.point = Point(0, 5)
+    temp_grid = judge.submit_agents_activity("./tests/datas/agent/missing_agent/data2.json")
+    for point in Point.gen_all_points(2, 6):
+        assert temp_grid.at(point) == 1

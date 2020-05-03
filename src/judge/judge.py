@@ -1,6 +1,8 @@
 from .field import Field, Point, Grid
+from .agent import Agent
 from collections import deque, defaultdict
 from typing import List, Dict, Tuple, Set, Deque, DefaultDict
+import json
 
 
 class Path(List[Point]):
@@ -37,9 +39,11 @@ class Path(List[Point]):
 
 
 class Judge:
-    def __init__(self, field: Field, teams: Tuple[str, str]):
+    def __init__(self, field: Field, teams: Tuple[str, str], agent_num: int = 6):
         self.field = field
         self.teams = teams
+        self.agent_num = agent_num
+        self.agents = {team: [Agent(field) for _ in range(agent_num)] for team in self.teams}
         self.wall_mark = {teams[0]: "O", teams[1]: "X"}
         self.zone_mark = {teams[0]: "+", teams[1]: "-"}
 
@@ -166,8 +170,6 @@ class Judge:
             return res
 
         def check_union(points_4: List[List[Point]], castle: List[Point]) -> bool:
-            if not points_4:
-                raise ValueError("takes empty list")
 
             def common_walls(points: List[Point]) -> Set[Point]:
                 return set(points) & set(castle)
@@ -190,6 +192,67 @@ class Judge:
                             parent_castle[point] = (team, castle)
                             zones[team].add(point)
         return zones
+
+    def submit_agents_activity(self, json_file_name: str) -> Grid[int]:
+        JSON = Dict[str, Dict[str, List[Dict[str, int]]]]
+
+        temp_grid = Grid([[0 for y in range(self.field.width)] for x in range(self.field.height)])
+        with open(json_file_name) as f:
+            directions: JSON = json.load(f)
+        for team in self.teams:
+            enemy_wall = [v for k, v in self.wall_mark.items() if k != team][0]
+            for id in range(self.agent_num):
+                agent: Agent = self.agents[team][id]
+                try:
+                    dic = directions[team]["agents"][id]
+                except IndexError:
+                    if agent.on_field:
+                        temp_grid[agent.point.x][agent.point.y] += 1
+                    continue
+                command: str
+                try:
+                    command = str(dic["command"])
+                except KeyError:
+                    command = None
+                if command == "placement":
+                    if agent.on_field:
+                        temp_grid[agent.point.x][agent.point.y] += 1
+                        self.next_activity = None
+                    else:
+                        if (0 <= dic["x"] < self.field.height and 0 <= dic["y"] < self.field.width) and (self.field.status.at(Point(dic["x"], dic["y"])) != enemy_wall):
+                            temp_grid[dic["x"]][dic["y"]] += 1
+                            agent.next_activity = "placement"
+                        else:
+                            self.next_activity = None
+                elif command == "move":
+                    if agent.on_field:
+                        dx, dy = dic["dx"], dic["dy"]
+                        target = Point(agent.point.x + dx, agent.point.y + dy)
+                        if (dx in {-1, 0, 1} and dy in {-1, 0, 1}) and (0 <= target.x < self.field.height and 0 <= target.y < self.field.width) and (self.field.status.at(target) != enemy_wall):
+                            temp_grid[target.x][target.y] += 1
+                            agent.next_activity = "move"
+                        else:
+                            temp_grid[agent.point.x][agent.point.y] += 1
+                            agent.next_activity = None
+                    else:
+                        agent.next_activity = None
+                elif command == "remove":
+                    if agent.on_field:
+                        dx, dy = dic["dx"], dic["dy"]
+                        target = Point(agent.point.x + dx, agent.point.y + dy)
+                        temp_grid[agent.point.x][agent.point.y] += 1
+                        if (dx in {-1, 0, 1} and dy in {-1, 0, 1}) and (0 <= target.x < self.field.height and 0 <= target.y < self.field.width) and (self.field.status.at(target) == enemy_wall):
+                            temp_grid[target.x][target.y] += 1
+                            agent.next_activity = "remove"
+                        else:
+                            agent.next_activity = None
+                    else:
+                        agent.next_activity = None
+                else:
+                    if agent.on_field:
+                        temp_grid[agent.point.x][agent.point.y] += 1
+                    agent.next_activity = None
+        return temp_grid
 
     def update(self) -> None:
         for team in self.teams:

@@ -29,7 +29,7 @@ class Grid(List[List[T]]):
 
 
 class Field:
-    def __init__(self, size: Tuple[int, int]):
+    def __init__(self, size: Tuple[int, int], agents: int = 6):
         self.size = size
         self.height, self.width = size
         self.base_point = Grid([[randint(-16, 16) for _ in range(self.width)] for _ in range(self.height)])
