@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture
 def agent(field):
-    return Agent(field)
+    return Agent(field.size)
 
 
 def test_agent_init(agent):

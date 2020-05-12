@@ -43,7 +43,7 @@ class Judge:
         self.field = field
         self.teams = teams
         self.agent_num = agent_num
-        self.agents = {team: [Agent(field) for _ in range(agent_num)] for team in self.teams}
+        self.agents = {team: [Agent(field.size) for _ in range(agent_num)] for team in self.teams}
         self.wall_mark = {teams[0]: "O", teams[1]: "X"}
         self.zone_mark = {teams[0]: "+", teams[1]: "-"}
 
@@ -193,11 +193,11 @@ class Judge:
                             zones[team].add(point)
         return zones
 
-    def submit_agents_activity(self, json_file_name: str) -> Grid[int]:
+    def submit_agents_activity(self, json_path: str) -> Grid[int]:
         JSON = Dict[str, Dict[str, List[Dict[str, int]]]]
 
         temp_grid = Grid([[0 for y in range(self.field.width)] for x in range(self.field.height)])
-        with open(json_file_name) as f:
+        with open(json_path) as f:
             directions: JSON = json.load(f)
         for team in self.teams:
             enemy_wall = [v for k, v in self.wall_mark.items() if k != team][0]
