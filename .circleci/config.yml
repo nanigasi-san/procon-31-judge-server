@@ -19,9 +19,17 @@ jobs:
           name: run test
           command: |
             . venv/bin/activate
-            pip install pytest
-            pip install pytest-cov
             pytest -vv --cov=src --cov-report=html:tests/reports --junit-xml=tests/results/results.xml
+      - run:
+          name: lint with flake8
+          command: |
+            . venv/bin/activate
+            flake8 src tests
+      - run:
+          name: lint with mypy
+          command: |
+            . venv/bin/activate
+            mypy src
       - save_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
